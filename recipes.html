@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recipes – The Hearth Cookbook</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #f7f0e3;
+      --warm-white: #fdf8f0;
+      --brown: #3b2a1a;
+      --brown-mid: #6b4c30;
+      --terracotta: #c1613a;
+      --sage: #7a8c6e;
+      --gold: #c9a84c;
+      --ink: #1e130a;
+      --accent: #c1613a;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--cream);
+      color: var(--ink);
+      font-family: 'Crimson Pro', Georgia, serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999; opacity: 0.5;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 2.5rem;
+      border-bottom: 1px solid rgba(59,42,26,0.1);
+      background: var(--warm-white);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem; font-weight: 700;
+      color: var(--brown); text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .nav-logo span { color: var(--terracotta); font-style: italic; }
+    .back-link {
+      font-size: 0.8rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--brown-mid);
+      text-decoration: none; font-weight: 600;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--terracotta); }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 3.5rem 2.5rem 2rem;
+      max-width: 900px; margin: 0 auto;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      flex-wrap: wrap; gap: 1.5rem;
+    }
+    .category-badge {
+      font-size: 0.72rem; letter-spacing: 0.4em;
+      text-transform: uppercase; color: var(--accent);
+      font-weight: 600; margin-bottom: 0.6rem;
+    }
+    .page-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 900; color: var(--brown);
+      line-height: 1;
+    }
+    .page-header h2 em { font-style: italic; color: var(--accent); }
+
+    /* ── ADD RECIPE BUTTON ── */
+    .btn-add {
+      background: var(--accent);
+      color: #fff; border: none; cursor: pointer;
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.85rem; letter-spacing: 0.2em;
+      text-transform: uppercase; font-weight: 600;
+      padding: 0.75rem 1.8rem;
+      border-radius: 2px;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .btn-add:hover { background: var(--brown); transform: translateY(-2px); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      max-width: 900px; margin: 0 auto 2.5rem;
+      padding: 0 2.5rem;
+      border-bottom: 1px solid rgba(59,42,26,0.12);
+    }
+
+    /* ── RECIPE LIST ── */
+    .recipe-list {
+      max-width: 900px; margin: 0 auto;
+      padding: 0 2.5rem 5rem;
+      display: flex; flex-direction: column; gap: 1.2rem;
+    }
+
+    .empty-state {
+      text-align: center; padding: 5rem 2rem;
+      color: var(--brown-mid);
+    }
+    .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+    .empty-state h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; font-style: italic;
+      margin-bottom: 0.5rem; color: var(--brown);
+    }
+    .empty-state p { font-size: 1rem; opacity: 0.7; }
+
+    /* ── RECIPE CARD ── */
+    .recipe-card {
+      background: var(--warm-white);
+      border: 1px solid rgba(59,42,26,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .recipe-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 1.8rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .recipe-card-header:hover { background: rgba(193,97,58,0.04); }
+
+    .recipe-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem; font-weight: 700; color: var(--brown);
+    }
+
+    .recipe-serves {
+      font-size: 0.82rem; color: var(--brown-mid);
+      font-style: italic; margin-top: 0.2rem;
+      letter-spacing: 0.02em;
+    }
+
+    .card-controls { display: flex; gap: 0.8rem; align-items: center; }
+    .btn-icon {
+      background: none; border: none; cursor: pointer;
+      font-size: 1rem; opacity: 0.45;
+      transition: opacity 0.2s, transform 0.2s;
+      padding: 0.3rem;
+      border-radius: 50%;
+    }
+    .btn-icon:hover { opacity: 1; transform: scale(1.15); }
+    .btn-delete:hover { color: #c0392b; }
+
+    .chevron {
+      width: 18px; height: 18px;
+      border-right: 2px solid var(--brown-mid);
+      border-bottom: 2px solid var(--brown-mid);
+      transform: rotate(45deg);
+      transition: transform 0.3s ease;
+      margin-left: 0.5rem; flex-shrink: 0;
+      opacity: 0.4;
+    }
+    .recipe-card.open .chevron { transform: rotate(-135deg); }
+
+    .recipe-body {
+      display: none;
+      padding: 0 1.8rem 1.8rem;
+      border-top: 1px solid rgba(59,42,26,0.08);
+    }
+    .recipe-card.open .recipe-body { display: block; }
+
+    .recipe-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr 2fr;
+      gap: 2rem;
+      margin-top: 1.4rem;
+    }
+    @media (max-width: 680px) {
+      .recipe-sections { grid-template-columns: 1fr; }
+    }
+
+    .section-title {
+      font-size: 0.68rem; letter-spacing: 0.35em;
+      text-transform: uppercase; color: var(--accent);
+      font-weight: 600; margin-bottom: 0.8rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(193,97,58,0.2);
+    }
+
+    .item-list { list-style: none; }
+    .item-list li {
+      font-size: 0.98rem; color: var(--brown-mid);
+      padding: 0.3rem 0;
+      display: flex; align-items: baseline; gap: 0.5rem;
+    }
+    .item-list li::before {
+      content: '—';
+      color: var(--accent); opacity: 0.5;
+      font-size: 0.8rem; flex-shrink: 0;
+    }
+
+    .steps-list { list-style: none; counter-reset: steps; }
+    .steps-list li {
+      counter-increment: steps;
+      font-size: 1rem; color: var(--brown-mid);
+      padding: 0.5rem 0 0.5rem 2.2rem;
+      position: relative; border-bottom: 1px dashed rgba(59,42,26,0.08);
+      line-height: 1.6;
+    }
+    .steps-list li:last-child { border-bottom: none; }
+    .steps-list li::before {
+      content: counter(steps);
+      position: absolute; left: 0;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700; font-size: 1.1rem;
+      color: var(--accent); opacity: 0.7;
+      line-height: 1.4;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(30,19,10,0.6);
+      backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--warm-white);
+      border-radius: 3px;
+      width: 100%; max-width: 700px;
+      max-height: 90vh; overflow-y: auto;
+      transform: translateY(30px) scale(0.97);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-header {
+      padding: 2rem 2rem 1.2rem;
+      border-bottom: 1px solid rgba(59,42,26,0.1);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--brown);
+    }
+    .modal-title em { color: var(--accent); font-style: italic; }
+    .btn-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 1.5rem; color: var(--brown-mid);
+      line-height: 1; padding: 0.2rem 0.5rem;
+      opacity: 0.5; transition: opacity 0.2s;
+    }
+    .btn-close:hover { opacity: 1; }
+
+    .modal-body { padding: 1.8rem 2rem; }
+
+    /* ── FORM STYLES ── */
+    .form-group { margin-bottom: 1.8rem; }
+    label {
+      display: block;
+      font-size: 0.68rem; letter-spacing: 0.35em;
+      text-transform: uppercase; color: var(--accent);
+      font-weight: 600; margin-bottom: 0.55rem;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      background: var(--cream);
+      border: 1px solid rgba(59,42,26,0.2);
+      border-radius: 2px;
+      padding: 0.65rem 0.9rem;
+      font-family: 'Crimson Pro', serif;
+      font-size: 1rem; color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(193,97,58,0.12);
+    }
+
+    /* ── DYNAMIC LIST BUILDER ── */
+    .list-builder { display: flex; flex-direction: column; gap: 0.5rem; }
+    .list-item-row {
+      display: flex; gap: 0.5rem; align-items: center;
+    }
+    .list-item-row input { flex: 1; }
+    .btn-row-remove {
+      background: none; border: 1px solid rgba(59,42,26,0.15);
+      border-radius: 2px; cursor: pointer;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: var(--brown-mid);
+      flex-shrink: 0; transition: background 0.2s, color 0.2s;
+    }
+    .btn-row-remove:hover { background: #f9ebe8; color: #c0392b; }
+
+    .btn-add-row {
+      align-self: flex-start;
+      background: none; border: 1px dashed rgba(59,42,26,0.3);
+      border-radius: 2px; cursor: pointer;
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.85rem; letter-spacing: 0.1em;
+      color: var(--brown-mid); padding: 0.4rem 0.9rem;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 0.3rem;
+    }
+    .btn-add-row:hover { border-color: var(--accent); color: var(--accent); }
+
+    .modal-footer {
+      padding: 1.2rem 2rem 2rem;
+      display: flex; gap: 0.8rem; justify-content: flex-end;
+    }
+    .btn-cancel {
+      background: none; border: 1px solid rgba(59,42,26,0.2);
+      border-radius: 2px; cursor: pointer;
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.85rem; letter-spacing: 0.15em;
+      text-transform: uppercase; font-weight: 600;
+      color: var(--brown-mid); padding: 0.7rem 1.5rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-cancel:hover { border-color: var(--brown); color: var(--brown); }
+    .btn-save {
+      background: var(--accent); border: none; cursor: pointer;
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.85rem; letter-spacing: 0.2em;
+      text-transform: uppercase; font-weight: 600;
+      color: #fff; padding: 0.7rem 2rem;
+      border-radius: 2px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-save:hover { background: var(--brown); transform: translateY(-2px); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: var(--brown); color: var(--cream);
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.9rem; padding: 0.9rem 1.5rem;
+      border-radius: 2px; z-index: 600;
+      transform: translateY(20px); opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(20px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    nav { animation: fadeUp 0.4s ease both; }
+    .page-header { animation: fadeUp 0.5s 0.1s ease both; }
+    .recipe-list { animation: fadeUp 0.5s 0.2s ease both; }
+
+    /* Scrollbar */
+    .modal::-webkit-scrollbar { width: 5px; }
+    .modal::-webkit-scrollbar-track { background: var(--cream); }
+    .modal::-webkit-scrollbar-thumb { background: rgba(59,42,26,0.25); border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">The <span>Hearth</span> Cookbook</a>
+    <a class="back-link" href="index.html">← All Chapters</a>
+  </nav>
+
+  <div class="page-header">
+    <div>
+      <div class="category-badge" id="category-badge"></div>
+      <h2 id="page-title">Recipes</h2>
+    </div>
+    <button class="btn-add" onclick="openModal()">+ Add Recipe</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="recipe-list" id="recipe-list">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- ── ADD RECIPE MODAL ── -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Add a <em>New Recipe</em></div>
+        <button class="btn-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label for="recipe-name">Recipe Name</label>
+          <input type="text" id="recipe-name" placeholder="e.g. Lemon Ricotta Pancakes"/>
+        </div>
+
+        <div class="form-group">
+          <label for="recipe-serves">Serves</label>
+          <input type="text" id="recipe-serves" placeholder="e.g. 4 people" style="max-width: 220px;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Ingredients</label>
+          <div class="list-builder" id="ingredients-builder">
+            <div class="list-item-row">
+              <input type="text" placeholder="e.g. 2 cups all-purpose flour"/>
+              <button class="btn-row-remove" onclick="removeRow(this)" title="Remove">×</button>
+            </div>
+          </div>
+          <button class="btn-add-row" onclick="addRow('ingredients-builder', 'e.g. 1 tsp vanilla extract')">+ Add Ingredient</button>
+        </div>
+
+        <div class="form-group">
+          <label>Materials &amp; Equipment</label>
+          <div class="list-builder" id="materials-builder">
+            <div class="list-item-row">
+              <input type="text" placeholder="e.g. 10-inch cast iron skillet"/>
+              <button class="btn-row-remove" onclick="removeRow(this)" title="Remove">×</button>
+            </div>
+          </div>
+          <button class="btn-add-row" onclick="addRow('materials-builder', 'e.g. Whisk')">+ Add Material</button>
+        </div>
+
+        <div class="form-group">
+          <label>Steps</label>
+          <div class="list-builder" id="steps-builder">
+            <div class="list-item-row">
+              <input type="text" placeholder="e.g. Combine dry ingredients in a large bowl"/>
+              <button class="btn-row-remove" onclick="removeRow(this)" title="Remove">×</button>
+            </div>
+          </div>
+          <button class="btn-add-row" onclick="addRow('steps-builder', 'e.g. Fold in the wet ingredients until just combined')">+ Add Step</button>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" onclick="saveRecipe()">Save Recipe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TOAST ── -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ─── CATEGORY SETUP ───────────────────────────────────────────────────────
+    const params   = new URLSearchParams(window.location.search);
+    const category = (params.get('category') || 'recipes').toLowerCase();
+
+    const META = {
+      breakfast: { label: 'Breakfast',  emoji: '🍳', accent: '#e8a040', title: 'Breakfast <em>Recipes</em>' },
+      appetizer: { label: 'Appetizer',  emoji: '🥗', accent: '#7a8c6e', title: 'Appetizer <em>Recipes</em>' },
+      entree:    { label: 'Entrée',     emoji: '🍽️', accent: '#c1613a', title: 'Entrée <em>Recipes</em>'    },
+      dessert:   { label: 'Dessert',    emoji: '🍰', accent: '#b85585', title: 'Dessert <em>Recipes</em>'   },
+      drink:     { label: 'Drinks',     emoji: '🥂', accent: '#3a7db5', title: 'Drink <em>Recipes</em>'     },
+    };
+
+    const meta = META[category] || { label: category, emoji: '📖', accent: '#c1613a', title: 'Recipes' };
+
+    document.title = `${meta.label} – The Hearth Cookbook`;
+    document.getElementById('category-badge').textContent = `Chapter · ${meta.emoji} ${meta.label}`;
+    document.getElementById('page-title').innerHTML = meta.title;
+    document.documentElement.style.setProperty('--accent', meta.accent);
+
+    // ─── LOCALSTORAGE HELPERS ────────────────────────────────────────────────
+    const STORAGE_KEY = `hearth_recipes_${category}`;
+
+    function loadRecipes() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveRecipes(recipes) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
+    }
+
+    // ─── RENDER RECIPE LIST ───────────────────────────────────────────────────
+    function render() {
+      const recipes = loadRecipes();
+      const container = document.getElementById('recipe-list');
+      container.innerHTML = '';
+
+      if (recipes.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">${meta.emoji}</div>
+            <h3>No recipes yet</h3>
+            <p>Add your first ${meta.label.toLowerCase()} recipe to get started.</p>
+          </div>`;
+        return;
+      }
+
+      recipes.forEach((r, i) => {
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
+        card.innerHTML = `
+          <div class="recipe-card-header" onclick="toggleCard(${i})">
+            <div>
+              <div class="recipe-name">${escHtml(r.name)}</div>
+              ${r.serves ? `<div class="recipe-serves">Serves ${escHtml(r.serves)}</div>` : ''}
+            </div>
+            <div class="card-controls">
+              <button class="btn-icon btn-delete" title="Delete recipe"
+                onclick="deleteRecipe(event, ${i})">🗑</button>
+              <div class="chevron"></div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div class="recipe-sections">
+              <div>
+                <div class="section-title">Ingredients</div>
+                <ul class="item-list">
+                  ${r.ingredients.map(x => `<li>${escHtml(x)}</li>`).join('') || '<li>None listed</li>'}
+                </ul>
+              </div>
+              <div>
+                <div class="section-title">Materials</div>
+                <ul class="item-list">
+                  ${r.materials.map(x => `<li>${escHtml(x)}</li>`).join('') || '<li>None listed</li>'}
+                </ul>
+              </div>
+              <div>
+                <div class="section-title">Steps</div>
+                <ol class="steps-list">
+                  ${r.steps.map(x => `<li>${escHtml(x)}</li>`).join('') || '<li>No steps listed</li>'}
+                </ol>
+              </div>
+            </div>
+          </div>`;
+        container.appendChild(card);
+      });
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ─── TOGGLE CARD ─────────────────────────────────────────────────────────
+    function toggleCard(index) {
+      const cards = document.querySelectorAll('.recipe-card');
+      cards[index].classList.toggle('open');
+    }
+
+    // ─── DELETE RECIPE ────────────────────────────────────────────────────────
+    function deleteRecipe(e, index) {
+      e.stopPropagation();
+      if (!confirm('Remove this recipe from your cookbook?')) return;
+      const recipes = loadRecipes();
+      recipes.splice(index, 1);
+      saveRecipes(recipes);
+      render();
+      showToast('Recipe removed.');
+    }
+
+    // ─── MODAL ────────────────────────────────────────────────────────────────
+    function openModal() {
+      resetForm();
+      document.getElementById('modal-overlay').classList.add('open');
+      document.getElementById('recipe-name').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    function resetForm() {
+      document.getElementById('recipe-name').value = '';
+      document.getElementById('recipe-serves').value = '';
+      ['ingredients-builder','materials-builder','steps-builder'].forEach(id => {
+        const b = document.getElementById(id);
+        b.innerHTML = `
+          <div class="list-item-row">
+            <input type="text" placeholder="${getPlaceholder(id)}"/>
+            <button class="btn-row-remove" onclick="removeRow(this)" title="Remove">×</button>
+          </div>`;
+      });
+    }
+
+    function getPlaceholder(id) {
+      if (id === 'ingredients-builder') return 'e.g. 2 cups all-purpose flour';
+      if (id === 'materials-builder')   return 'e.g. 10-inch cast iron skillet';
+      return 'e.g. Combine dry ingredients in a large bowl';
+    }
+
+    // ─── LIST BUILDER HELPERS ─────────────────────────────────────────────────
+    function addRow(builderId, placeholder) {
+      const b = document.getElementById(builderId);
+      const row = document.createElement('div');
+      row.className = 'list-item-row';
+      row.innerHTML = `
+        <input type="text" placeholder="${placeholder}"/>
+        <button class="btn-row-remove" onclick="removeRow(this)" title="Remove">×</button>`;
+      b.appendChild(row);
+      row.querySelector('input').focus();
+    }
+
+    function removeRow(btn) {
+      const builder = btn.closest('.list-builder');
+      if (builder.querySelectorAll('.list-item-row').length <= 1) {
+        btn.previousElementSibling.value = '';
+        return;
+      }
+      btn.closest('.list-item-row').remove();
+    }
+
+    function getListValues(builderId) {
+      return Array.from(
+        document.getElementById(builderId).querySelectorAll('input')
+      ).map(i => i.value.trim()).filter(Boolean);
+    }
+
+    // ─── SAVE RECIPE ──────────────────────────────────────────────────────────
+    function saveRecipe() {
+      const name = document.getElementById('recipe-name').value.trim();
+      if (!name) {
+        document.getElementById('recipe-name').focus();
+        showToast('Please enter a recipe name.', true);
+        return;
+      }
+
+      const recipe = {
+        name,
+        serves:      document.getElementById('recipe-serves').value.trim(),
+        ingredients: getListValues('ingredients-builder'),
+        materials:   getListValues('materials-builder'),
+        steps:       getListValues('steps-builder'),
+        created:     Date.now(),
+      };
+
+      const recipes = loadRecipes();
+      recipes.push(recipe);
+      saveRecipes(recipes);
+      closeModal();
+      render();
+      showToast(`"${name}" saved to your cookbook!`);
+    }
+
+    // ─── TOAST ────────────────────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = isError ? '#8b3225' : 'var(--brown)';
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    render();
+  </script>
+
+</body>
+</html>

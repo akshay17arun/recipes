@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Akshay's Cookbook</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #f7f0e3;
+      --warm-white: #fdf8f0;
+      --brown: #3b2a1a;
+      --brown-mid: #6b4c30;
+      --terracotta: #c1613a;
+      --sage: #7a8c6e;
+      --gold: #c9a84c;
+      --ink: #1e130a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--cream);
+      color: var(--ink);
+      font-family: 'Crimson Pro', Georgia, serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE TEXTURE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.5;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      padding: 5rem 2rem 3rem;
+      position: relative;
+    }
+
+    .header-rule {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      justify-content: center;
+      margin-bottom: 1.8rem;
+    }
+    .header-rule span {
+      display: block;
+      height: 1px;
+      width: 80px;
+      background: var(--brown-mid);
+      opacity: 0.4;
+    }
+    .header-rule .diamond {
+      width: 7px; height: 7px;
+      background: var(--terracotta);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    .subtitle-top {
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      font-weight: 600;
+      margin-bottom: 0.9rem;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.5rem, 8vw, 6.5rem);
+      font-weight: 900;
+      line-height: 0.9;
+      color: var(--brown);
+      letter-spacing: -0.02em;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--terracotta);
+    }
+
+    .tagline {
+      margin-top: 1.4rem;
+      font-size: 1.2rem;
+      color: var(--brown-mid);
+      font-style: italic;
+      font-weight: 300;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── DECORATIVE DIVIDER ── */
+    .ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin: 3.5rem auto;
+      max-width: 400px;
+    }
+    .ornament-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--brown-mid));
+      opacity: 0.25;
+    }
+    .ornament-line.right {
+      background: linear-gradient(to left, transparent, var(--brown-mid));
+    }
+    .ornament svg { opacity: 0.5; }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      text-align: center;
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--sage);
+      font-weight: 600;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── CATEGORY GRID ── */
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2.5rem 6rem;
+    }
+
+    /* When fewer cards are visible, switch to flex so they center naturally */
+    body:not(.edit-mode) .categories {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    body:not(.edit-mode) .category-card {
+      width: 200px;
+      flex: 0 1 220px;
+    }
+
+    .category-card {
+      position: relative;
+      background: var(--warm-white);
+      border: 1px solid rgba(59,42,26,0.12);
+      border-radius: 2px;
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+      overflow: hidden;
+    }
+
+    .category-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--card-accent, var(--terracotta));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+      transform-origin: left;
+    }
+
+    .category-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(59,42,26,0.12);
+      background: #fff;
+    }
+
+    .category-card:hover::before { transform: scaleX(1); }
+
+    .card-icon {
+      font-size: 2.8rem;
+      line-height: 1;
+      filter: grayscale(0.1);
+      transition: transform 0.3s ease;
+    }
+    .category-card:hover .card-icon { transform: scale(1.15) rotate(-3deg); }
+
+    .card-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--brown);
+      letter-spacing: 0.01em;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--brown-mid);
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .card-arrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--card-accent, var(--terracotta));
+      font-family: 'Crimson Pro', serif;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .category-card:hover .card-arrow { opacity: 1; transform: translateY(0); }
+
+    /* ── SECTION ROW ── */
+    .section-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+    }
+    .section-row .section-label { margin-bottom: 0; }
+
+    .btn-customize {
+      background: none;
+      border: 1px solid rgba(59,42,26,0.22);
+      border-radius: 2px;
+      cursor: pointer;
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--brown-mid);
+      padding: 0.35rem 0.9rem;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-customize:hover,
+    .btn-customize.active {
+      border-color: var(--terracotta);
+      color: var(--terracotta);
+      background: rgba(193,97,58,0.06);
+    }
+
+    /* ── HIDDEN CARDS ── */
+    .category-card.hidden-card {
+      display: none;
+    }
+
+    /* ── EDIT MODE ── */
+    body.edit-mode .category-card {
+      cursor: default;
+      pointer-events: all !important;
+    }
+    body.edit-mode .category-card.hidden-card {
+      display: flex;
+      opacity: 0.35;
+      padding: 2.5rem 1.5rem 2rem;
+      border: 1px dashed rgba(59,42,26,0.2);
+      pointer-events: all;
+    }
+    body.edit-mode .category-card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    body.edit-mode .category-card::before { display: none; }
+    body.edit-mode .card-arrow { display: none; }
+
+    /* toggle overlay chip */
+    .toggle-chip {
+      display: none;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 600;
+      font-family: 'Crimson Pro', serif;
+      padding: 0.3rem 0.75rem;
+      border-radius: 2px;
+      border: 1px solid currentColor;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    body.edit-mode .toggle-chip { display: inline-block; }
+    body.edit-mode .category-card:not(.hidden-card) .toggle-chip {
+      color: #c0392b;
+      border-color: rgba(192,57,43,0.35);
+    }
+    body.edit-mode .category-card:not(.hidden-card) .toggle-chip:hover {
+      background: rgba(192,57,43,0.08);
+    }
+    body.edit-mode .category-card.hidden-card .toggle-chip {
+      color: var(--sage);
+      border-color: rgba(122,140,110,0.5);
+    }
+    body.edit-mode .category-card.hidden-card .toggle-chip:hover {
+      background: rgba(122,140,110,0.1);
+    }
+    body.edit-mode .category-card a { pointer-events: none; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      color: var(--brown-mid);
+      opacity: 0.5;
+      letter-spacing: 0.1em;
+      border-top: 1px solid rgba(59,42,26,0.1);
+    }
+
+    /* ── ENTRANCE ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header { animation: fadeUp 0.7s ease both; }
+    .ornament { animation: fadeUp 0.7s 0.2s ease both; }
+    .section-label { animation: fadeUp 0.6s 0.3s ease both; }
+
+    .category-card {
+      animation: fadeUp 0.5s ease both;
+    }
+    .category-card:nth-child(1) { animation-delay: 0.35s; }
+    .category-card:nth-child(2) { animation-delay: 0.42s; }
+    .category-card:nth-child(3) { animation-delay: 0.49s; }
+    .category-card:nth-child(4) { animation-delay: 0.56s; }
+    .category-card:nth-child(5) { animation-delay: 0.63s; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-rule">
+      <span></span>
+      <div class="diamond"></div>
+      <span></span>
+    </div>
+    <h1>Akshay's<br/><em>Personal</em><br/>Cookbook</h1>
+  </header>
+
+  <div class="ornament">
+    <div class="ornament-line"></div>
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 1 L13 9 L21 11 L13 13 L11 21 L9 13 L1 11 L9 9 Z" fill="#c1613a"/>
+    </svg>
+    <div class="ornament-line right"></div>
+  </div>
+
+  <div class="section-row">
+    <p class="section-label">Choose a chapter</p>
+    <button class="btn-customize" id="btn-customize" onclick="toggleEditMode()">✦ Customize</button>
+  </div>
+
+  <div class="categories" id="categories">
+
+    <a class="category-card" href="recipes.html?category=breakfast"
+       style="--card-accent: #e8a040;" data-category="breakfast">
+      <div class="card-icon">🍳</div>
+      <div class="card-label">Breakfast</div>
+      <div class="card-arrow">Open →</div>
+      <span class="toggle-chip" onclick="toggleCard(event,'breakfast')"></span>
+    </a>
+
+    <a class="category-card" href="recipes.html?category=appetizer"
+       style="--card-accent: #7a8c6e;" data-category="appetizer">
+      <div class="card-icon">🥗</div>
+      <div class="card-label">Appetizer</div>
+      <div class="card-arrow">Open →</div>
+      <span class="toggle-chip" onclick="toggleCard(event,'appetizer')"></span>
+    </a>
+
+    <a class="category-card" href="recipes.html?category=entree"
+       style="--card-accent: #c1613a;" data-category="entree">
+      <div class="card-icon">🍽️</div>
+      <div class="card-label">Entrée</div>
+      <div class="card-arrow">Open →</div>
+      <span class="toggle-chip" onclick="toggleCard(event,'entree')"></span>
+    </a>
+
+    <a class="category-card" href="recipes.html?category=dessert"
+       style="--card-accent: #b85585;" data-category="dessert">
+      <div class="card-icon">🍰</div>
+      <div class="card-label">Dessert</div>
+      <div class="card-arrow">Open →</div>
+      <span class="toggle-chip" onclick="toggleCard(event,'dessert')"></span>
+    </a>
+
+    <a class="category-card" href="recipes.html?category=drink"
+       style="--card-accent: #3a7db5;" data-category="drink">
+      <div class="card-icon">🥂</div>
+      <div class="card-label">Drinks</div>
+      <div class="card-arrow">Open →</div>
+      <span class="toggle-chip" onclick="toggleCard(event,'drink')"></span>
+    </a>
+
+  </div>
+
+  <script>
+    const HIDDEN_KEY = 'hearth_hidden_categories';
+
+    function loadHidden() {
+      try { return new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY)) || []); }
+      catch { return new Set(); }
+    }
+    function saveHidden(set) {
+      localStorage.setItem(HIDDEN_KEY, JSON.stringify([...set]));
+    }
+
+    function applyVisibility() {
+      const hidden = loadHidden();
+      document.querySelectorAll('.category-card').forEach(card => {
+        const cat = card.dataset.category;
+        const isHidden = hidden.has(cat);
+        card.classList.toggle('hidden-card', isHidden);
+        const chip = card.querySelector('.toggle-chip');
+        chip.textContent = isHidden ? 'Show' : 'Hide';
+      });
+    }
+
+    function toggleCard(e, cat) {
+      e.preventDefault(); e.stopPropagation();
+      const hidden = loadHidden();
+      if (hidden.has(cat)) hidden.delete(cat); else hidden.add(cat);
+      saveHidden(hidden);
+      applyVisibility();
+    }
+
+    let editMode = false;
+    function toggleEditMode() {
+      editMode = !editMode;
+      document.body.classList.toggle('edit-mode', editMode);
+      const btn = document.getElementById('btn-customize');
+      btn.classList.toggle('active', editMode);
+      btn.textContent = editMode ? '✓ Done' : '✦ Customize';
+    }
+
+    applyVisibility();
+  </script>
+
+</body>
+</html>
